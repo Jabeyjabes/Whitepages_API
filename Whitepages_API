@@ -1,0 +1,69 @@
+import requests
+from bs4 import BeautifulSoup
+import sys
+import subprocess
+
+subprocess.call('clear', shell=True)
+
+
+def start(firstname, surname):
+    try:
+        url = 'http://search.whitepages.co.uk/atoz/'
+        url_occupants = 'http://search.whitepages.co.uk'
+        firstname = firstname
+        surname = surname
+        extention = surname + '/' + firstname
+        r = requests.get(url + extention)
+        soup = BeautifulSoup(r.content)
+        all_people1 = soup(attrs={'class': 'white'})
+        for result1 in all_people1:
+            r = requests.get(url + extention)
+            soup = BeautifulSoup(r.content)
+            name = result1.find(attrs={'class': 'col1'})
+            name_txt = name.text
+            address = result1.find(attrs={'class': 'col2'})
+            address_txt = address.text
+            name_link = name.find('a')['href']
+            try:
+                r = requests.get(url_occupants + name_link)
+                soup = BeautifulSoup(r.content)
+                tags = soup.findAll('p')
+                occupants_tag = tags[3]
+                occupants_text = occupants_tag.text
+                occupants_split = occupants_text.split(':')
+                occupants = occupants_split[1]
+            except:
+                pass
+            result1 = '\033[1m' + '\tName' + '\033[0m' + '\n' + name_txt + '\n' + '\033[1m' + '\tOccupants' + '\033[0m' + occupants + '\n' + '\033[1m' + '\tAddress' + '\033[0m' + '\n' + address_txt
+            print result1
+            print '-' * 60
+        all_people2 = soup('tr', {'class': ''})
+        for result2 in all_people2:
+            r = requests.get(url + extention)
+            soup = BeautifulSoup(r.content)
+            name = result2.find(attrs={'class': 'col1'})
+            name_txt = name.text
+            address = result2.find(attrs={'class': 'col2'})
+            address_txt = address.text
+            name_link = name.find('a')['href']
+            try:
+                r = requests.get(url_occupants + name_link)
+                soup = BeautifulSoup(r.content)
+                tags = soup.findAll('p')
+                occupants_tag = tags[3]
+                occupants_text = occupants_tag.text
+                occupants_split = occupants_text.split(':')
+                occupants = occupants_split[1]
+            except:
+                pass
+            result2 = '\033[1m' + '\tName' + '\033[0m' + '\n' + name_txt + '\n' + '\033[1m' + '\tOccupants' + '\033[0m' + occupants + '\n' + '\033[1m' + '\tAddress' + '\033[0m' + '\n' + address_txt
+            if name_txt != 'Name':
+                print result2
+    except:
+        print 'no name found'
+        pass
+try:
+    start(sys.argv[1], sys.argv[2])
+except:
+    print 'Must submit a first name and second name e.g. John Doe'
+    pass
